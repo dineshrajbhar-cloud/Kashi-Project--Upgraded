@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
@@ -20,6 +21,7 @@ public class GalleryService {
     private static final Set<String> SORT_FIELDS = Set.of("title", "createdAt");
 
     private final GalleryImageRepository galleryImageRepository;
+    private final ImageStorageService imageStorageService;
 
     public PageResponse<GalleryImageResponse> getImages(int page, int size, String sort) {
         Pageable pageable = Paging.of(page, size, sort, SORT_FIELDS);
@@ -54,5 +56,43 @@ public class GalleryService {
         image.setTitle(request.title());
         image.setImageUrl(request.imageUrl());
         image.setCaption(request.caption());
+    }
+
+    @Transactional
+    public GalleryImageResponse uploadImage(
+            String title,
+            String caption,
+            MultipartFile file) {
+
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Title is required.");
+        }
+
+        if (title.trim().length() > 150) {
+            throw new IllegalArgumentException(
+                    "Title must be at most 150 characters."
+            );
+        }
+
+        if (caption != null && caption.trim().length() > 500) {
+            throw new IllegalArgumentException(
+                    "Caption must be at most 500 characters."
+            );
+        }
+
+        String imageUrl = imageStorageService.store(file);
+
+        GalleryImage image = new GalleryImage();
+        image.setTitle(title.trim());
+        image.setImageUrl(imageUrl);
+        image.setCaption(
+                caption == null || caption.isBlank()
+                        ? null
+                        : caption.trim()
+        );
+
+        return GalleryImageResponse.from(
+                galleryImageRepository.save(image)
+        );
     }
 }

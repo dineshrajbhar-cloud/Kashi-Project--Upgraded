@@ -50,10 +50,16 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/places", "/api/places/*", "/api/gallery").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/gallery/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/feedback").permitAll()
+                        // Public endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/places", "/api/places/*", "/api/gallery").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/feedback").permitAll()
 
                         // ADMIN only
-                        .requestMatchers(HttpMethod.POST, "/api/places", "/api/gallery").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/places", "/api/gallery", "/api/gallery/upload").hasRole("ADMIN")
+//                        .requestMatchers(HttpMethod.POST, "/api/places", "/api/gallery").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/places/*", "/api/gallery/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/places/*", "/api/gallery/*").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/feedback").hasRole("ADMIN")
