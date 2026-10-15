@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/places", "/api/places/*", "/api/gallery").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/feedback").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/ai/chat").permitAll()
 
                         // ADMIN only
                         .requestMatchers(HttpMethod.POST, "/api/places", "/api/gallery", "/api/gallery/upload").hasRole("ADMIN")

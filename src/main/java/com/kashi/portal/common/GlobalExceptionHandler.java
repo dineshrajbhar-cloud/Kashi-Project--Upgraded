@@ -18,15 +18,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import com.kashi.portal.common.AiServiceUnavailableException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Turns exceptions into the one JSON error shape used by the whole API.
- * Messages are written for API clients and never contain stack traces, SQL or internal details.
- */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -115,6 +112,24 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.FORBIDDEN, "You do not have permission to perform this action", request, null);
     }
 
+    @ExceptionHandler(AiServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleAiServiceUnavailable(
+            AiServiceUnavailableException ex,
+            HttpServletRequest request) {
+
+        log.warn("AI service unavailable on {} {}: {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                ex.getMessage());
+
+        return build(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                ex.getMessage(),
+                request,
+                null
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
         log.error("Unexpected error on {} {}", request.getMethod(), request.getRequestURI(), ex);
@@ -132,4 +147,5 @@ public class GlobalExceptionHandler {
                 fieldErrors);
         return ResponseEntity.status(status).body(body);
     }
+
 }
