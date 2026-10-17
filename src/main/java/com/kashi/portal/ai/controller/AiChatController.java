@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/ai")
 public class AiChatController {
@@ -21,10 +23,30 @@ public class AiChatController {
     public ResponseEntity<AiChatResponse> chat(
             @Valid @RequestBody AiChatRequest request
     ) {
-        String reply = geminiAiService.generateReply(request.message());
+        String conversationId = request.conversationId();
+
+        if (conversationId == null || conversationId.isBlank()) {
+            conversationId = UUID.randomUUID().toString();
+        }
+
+        String reply = geminiAiService.generateReply(
+                conversationId,
+                request.message()
+        );
 
         return ResponseEntity.ok(
-                new AiChatResponse(reply)
+                new AiChatResponse(reply, conversationId)
         );
     }
+
+//    @PostMapping("/chat")
+//    public ResponseEntity<AiChatResponse> chat(
+//            @Valid @RequestBody AiChatRequest request
+//    ) {
+//        String reply = geminiAiService.generateReply(request.message());
+//
+//        return ResponseEntity.ok(
+//                new AiChatResponse(reply)
+//        );
+//    }
 }
