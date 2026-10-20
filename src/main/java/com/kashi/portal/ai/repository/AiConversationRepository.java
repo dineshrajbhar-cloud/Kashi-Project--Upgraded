@@ -1,6 +1,6 @@
 package com.kashi.portal.ai.repository;
 
-import com.kashi.portal.entity.AiConversation;
+import com.kashi.portal.ai.entity.AiConversation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

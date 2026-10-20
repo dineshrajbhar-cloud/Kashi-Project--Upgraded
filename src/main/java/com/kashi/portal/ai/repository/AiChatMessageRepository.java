@@ -1,6 +1,6 @@
 package com.kashi.portal.ai.repository;
 
-import com.kashi.portal.entity.AiChatMessage;
+import com.kashi.portal.ai.entity.AiChatMessage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

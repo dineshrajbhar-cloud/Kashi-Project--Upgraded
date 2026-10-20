@@ -1,4 +1,4 @@
-package com.kashi.portal.entity;
+package com.kashi.portal.ai.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

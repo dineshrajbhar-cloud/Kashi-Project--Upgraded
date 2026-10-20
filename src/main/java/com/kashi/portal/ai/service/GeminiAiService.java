@@ -89,6 +89,7 @@ public class GeminiAiService {
         List<ConversationMemoryService.ChatMessage> history =
                 conversationMemoryService.getHistory(conversationId);
 
+
         List<Map<String, String>> messages = new ArrayList<>();
 
         messages.add(Map.of(
@@ -168,18 +169,25 @@ public class GeminiAiService {
 
             String reply = textNode.asText();
 
-            // Save the exchange only after receiving a successful reply.
-            conversationMemoryService.addMessage(
+            // Save both messages in a single database transaction.
+            conversationMemoryService.addExchange(
                     conversationId,
-                    "user",
-                    message
-            );
-
-            conversationMemoryService.addMessage(
-                    conversationId,
-                    "assistant",
+                    message,
                     reply
             );
+
+//            // Save the exchange only after receiving a successful reply.
+//            conversationMemoryService.addMessage(
+//                    conversationId,
+//                    "user",
+//                    message
+//            );
+//
+//            conversationMemoryService.addMessage(
+//                    conversationId,
+//                    "assistant",
+//                    reply
+//            );
 
             return reply;
 

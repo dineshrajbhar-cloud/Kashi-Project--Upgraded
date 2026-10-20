@@ -1,46 +1,108 @@
 package com.kashi.portal.ai.service;
 
+import com.kashi.portal.ai.entity.AiChatMessage;
+import com.kashi.portal.ai.entity.AiConversation;
+import com.kashi.portal.ai.repository.AiChatMessageRepository;
+import com.kashi.portal.ai.repository.AiConversationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ConversationMemoryService {
 
     private static final int MAX_HISTORY_MESSAGES = 10;
 
-    private final Map<String, List<ChatMessage>> conversations =
-            new ConcurrentHashMap<>();
+    private final AiConversationRepository conversationRepository;
+    private final AiChatMessageRepository messageRepository;
 
-    public List<ChatMessage> getHistory(String conversationId) {
-        List<ChatMessage> history = conversations.get(conversationId);
-
-        if (history == null) {
-            return new ArrayList<>();
-        }
-
-        synchronized (history) {
-            return new ArrayList<>(history);
-        }
+    public ConversationMemoryService(
+            AiConversationRepository conversationRepository,
+            AiChatMessageRepository messageRepository
+    ) {
+        this.conversationRepository = conversationRepository;
+        this.messageRepository = messageRepository;
     }
 
-    public void addMessage(String conversationId, String role, String content) {
-        List<ChatMessage> history = conversations.computeIfAbsent(
-                conversationId,
-                key -> new ArrayList<>()
+    @Transactional(readOnly = true)
+    public List<ChatMessage> getHistory(String conversationId) {
+
+        List<AiChatMessage> messages =
+                messageRepository
+                        .findByConversation_ConversationIdOrderByCreatedAtAscIdAsc(
+                                conversationId
+                        );
+
+        int startIndex = Math.max(
+                0,
+                messages.size() - MAX_HISTORY_MESSAGES
         );
 
-        synchronized (history) {
-            history.add(new ChatMessage(role, content));
+        return messages.subList(startIndex, messages.size())
+                .stream()
+                .map(message -> new ChatMessage(
+                        message.getRole(),
+                        message.getContent()
+                ))
+                .toList();
+    }
 
-            if (history.size() > MAX_HISTORY_MESSAGES) {
-                int excess = history.size() - MAX_HISTORY_MESSAGES;
-                history.subList(0, excess).clear();
-            }
+    @Transactional
+    public void addMessage(
+            String conversationId,
+            String role,
+            String content
+    ) {
+
+        AiConversation conversation = conversationRepository
+                .findByConversationId(conversationId)
+                .orElseGet(() -> conversationRepository.save(
+                        new AiConversation(
+                                conversationId,
+                                generateTitle(content)
+                        )
+                ));
+
+        messageRepository.save(
+                new AiChatMessage(conversation, role, content)
+        );
+    }
+
+    @Transactional
+    public void addExchange(
+            String conversationId,
+            String userMessage,
+            String assistantReply
+    ) {
+        AiConversation conversation = conversationRepository
+                .findByConversationId(conversationId)
+                .orElseGet(() -> conversationRepository.save(
+                        new AiConversation(
+                                conversationId,
+                                generateTitle(userMessage)
+                        )
+                ));
+
+        messageRepository.saveAll(List.of(
+                new AiChatMessage(conversation, "user", userMessage),
+                new AiChatMessage(conversation, "assistant", assistantReply)
+        ));
+    }
+
+    private String generateTitle(String message) {
+        if (message == null || message.isBlank()) {
+            return "New Conversation";
         }
+
+        String title = message.trim()
+                .replaceAll("\\s+", " ");
+
+        if (title.length() > 150) {
+            title = title.substring(0, 147) + "...";
+        }
+
+        return title;
     }
 
     public record ChatMessage(String role, String content) {
