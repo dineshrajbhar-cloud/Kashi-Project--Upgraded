@@ -6,6 +6,8 @@ import com.kashi.portal.ai.repository.AiChatMessageRepository;
 import com.kashi.portal.ai.repository.AiConversationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.kashi.portal.ai.dto.AiConversationResponse;
+import com.kashi.portal.ai.dto.AiChatMessageResponse;
 
 import java.util.List;
 
@@ -88,6 +90,56 @@ public class ConversationMemoryService {
                 new AiChatMessage(conversation, "user", userMessage),
                 new AiChatMessage(conversation, "assistant", assistantReply)
         ));
+    }
+
+    @Transactional(readOnly = true)
+    public List<AiConversationResponse> getAllConversations() {
+        return conversationRepository.findAllByOrderByUpdatedAtDesc()
+                .stream()
+                .map(conversation -> new AiConversationResponse(
+                        conversation.getConversationId(),
+                        conversation.getTitle(),
+                        conversation.getCreatedAt(),
+                        conversation.getUpdatedAt()
+                ))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AiChatMessageResponse> getConversationMessages(
+            String conversationId
+    ) {
+        return messageRepository
+                .findByConversation_ConversationIdOrderByCreatedAtAscIdAsc(
+                        conversationId
+                )
+                .stream()
+                .map(message -> new AiChatMessageResponse(
+                        message.getRole(),
+                        message.getContent(),
+                        message.getCreatedAt()
+                ))
+                .toList();
+    }
+
+    @Transactional
+    public boolean deleteConversation(String conversationId) {
+
+        AiConversation conversation = conversationRepository
+                .findByConversationId(conversationId)
+                .orElse(null);
+
+        if (conversation == null) {
+            return false;
+        }
+
+        // Delete all messages associated with this conversation
+        messageRepository.deleteByConversation_ConversationId(conversationId);
+
+        // Delete the conversation
+        conversationRepository.delete(conversation);
+
+        return true;
     }
 
     private String generateTitle(String message) {

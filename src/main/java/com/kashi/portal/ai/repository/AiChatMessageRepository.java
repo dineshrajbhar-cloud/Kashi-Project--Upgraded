@@ -10,4 +10,6 @@ public interface AiChatMessageRepository extends JpaRepository<AiChatMessage, Lo
     List<AiChatMessage> findByConversation_ConversationIdOrderByCreatedAtAscIdAsc(
             String conversationId
     );
+
+    void deleteByConversation_ConversationId(String conversationId);
 }
