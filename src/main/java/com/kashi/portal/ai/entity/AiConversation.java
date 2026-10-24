@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.kashi.portal.user.User;
 
 import java.time.LocalDateTime;
 
@@ -36,10 +37,19 @@ public class AiConversation {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public AiConversation(String conversationId, String title) {
+    public AiConversation(String conversationId, String title, User user) {
         this.conversationId = conversationId;
         this.title = title;
+        this.user = user;
     }
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_ai_conversations_user")
+    )
+    private User user;
 
     @PrePersist
     protected void onCreate() {

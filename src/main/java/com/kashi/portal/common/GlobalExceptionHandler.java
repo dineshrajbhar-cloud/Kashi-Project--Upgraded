@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import com.kashi.portal.common.AiServiceUnavailableException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -125,6 +126,21 @@ public class GlobalExceptionHandler {
         return build(
                 HttpStatus.SERVICE_UNAVAILABLE,
                 ex.getMessage(),
+                request,
+                null
+        );
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex,
+            HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
+
+        return build(
+                status,
+                ex.getReason() != null ? ex.getReason() : status.getReasonPhrase(),
                 request,
                 null
         );

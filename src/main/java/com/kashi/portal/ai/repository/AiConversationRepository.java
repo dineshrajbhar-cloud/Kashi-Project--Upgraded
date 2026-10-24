@@ -8,10 +8,21 @@ import java.util.Optional;
 
 public interface AiConversationRepository extends JpaRepository<AiConversation, Long> {
 
-    Optional<AiConversation> findByConversationId(String conversationId);
+    // Find a conversation only if it belongs to the specified user.
+    Optional<AiConversation> findByConversationIdAndUser_Id( String conversationId, Long userId );
+
+    // Check ownership before accessing or deleting a conversation.
+    boolean existsByConversationIdAndUser_Id( String conversationId, Long userId );
+
+    // Retrieve only the authenticated user's conversations.
+    List<AiConversation> findAllByUser_IdOrderByUpdatedAtDesc(Long userId);
 
     boolean existsByConversationId(String conversationId);
 
-    List<AiConversation> findAllByOrderByUpdatedAtDesc();
+//    Optional<AiConversation> findByConversationId(String conversationId);
+//
+//    boolean existsByConversationId(String conversationId);
+//
+//    List<AiConversation> findAllByOrderByUpdatedAtDesc();
 
 }
