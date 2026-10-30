@@ -77,31 +77,6 @@ public class ConversationMemoryService {
                 .toList();
     }
 
-//    @Transactional(readOnly = true)
-//    public List<ChatMessage> getHistory(String conversationId, Long userId) {
-//
-//        AiConversation conversation = getOwnedConversation(conversationId, userId);
-//
-//        List<AiChatMessage> messages =
-//                messageRepository
-//                        .findByConversation_ConversationIdOrderByCreatedAtAscIdAsc(
-//                                conversation.getConversationId()
-//                        );
-//
-//        int startIndex = Math.max(
-//                0,
-//                messages.size() - MAX_HISTORY_MESSAGES
-//        );
-//
-//        return messages.subList(startIndex, messages.size())
-//                .stream()
-//                .map(message -> new ChatMessage(
-//                        message.getRole(),
-//                        message.getContent()
-//                ))
-//                .toList();
-//    }
-
     @Transactional
     public void addExchange(
             String conversationId,
