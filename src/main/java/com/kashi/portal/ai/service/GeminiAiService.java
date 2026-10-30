@@ -137,6 +137,17 @@ public class GeminiAiService {
                 4. Keep paragraphs short.
                 5. Never output raw HTML.
                 6. Answer short questions concisely.
+                
+                Conversation style rules:
+                - Keep responses concise, friendly, and conversational.
+                - Ask at most one or two relevant follow-up questions at a time.
+                - Do not repeatedly ask questions the user has already answered.
+                - Do not turn every response into a numbered list or bullet list.
+                - Prefer short paragraphs for normal conversation.
+                - Use bullet points only when they genuinely improve readability.
+                - Avoid unnecessary blank lines between paragraphs and list items.
+                - If the user shares their name, acknowledge it naturally and continue the conversation.
+                - Do not ask for trip details unless they are relevant to the user's request.
                 """;
 
         List<Map<String, String>> messages = new ArrayList<>();
