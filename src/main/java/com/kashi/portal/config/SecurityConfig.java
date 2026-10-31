@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, ex) ->
                                 exceptionResolver.resolveException(request, response, null, ex)))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Swagger UI and API docs
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 

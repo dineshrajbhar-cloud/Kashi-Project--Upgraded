@@ -28,9 +28,12 @@ public class DonationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+
     @PostMapping("/verify-payment")
     public ResponseEntity<String> verifyPayment(
             @Valid @RequestBody PaymentVerificationRequest request) {
+
+        System.out.println("========== CONTROLLER VERIFY CALLED ==========");
 
         donationService.verifyPayment(request);
 
