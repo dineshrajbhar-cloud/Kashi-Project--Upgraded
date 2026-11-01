@@ -60,6 +60,20 @@ public class Place {
     @Column(precision = 10, scale = 7)
     private BigDecimal longitude;
 
+    @Column(name = "booking_available", nullable = false)
+    @Builder.Default
+    private boolean bookingAvailable = false;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "booking_type", nullable = false, length = 20)
+    @Builder.Default
+    private BookingType bookingType = BookingType.FREE;
+
+    @Column(name = "price_per_person", nullable = false, precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal pricePerPerson = BigDecimal.ZERO;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

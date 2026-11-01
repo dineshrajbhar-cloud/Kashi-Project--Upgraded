@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 import java.util.Set;
 
 @Service
@@ -65,5 +67,24 @@ public class PlaceService {
         place.setSourceUrl(request.sourceUrl());
         place.setLatitude(request.latitude());
         place.setLongitude(request.longitude());
+
+        if (request.bookingType() == null || request.pricePerPerson() == null) {
+            throw new IllegalArgumentException("Booking type and price are required");
+        }
+
+        if (request.bookingType() == BookingType.FREE
+                && request.pricePerPerson().compareTo(BigDecimal.ZERO) != 0) {
+            throw new IllegalArgumentException("Free tours must have zero price");
+        }
+
+        if (request.bookingType() == BookingType.PAID
+                && request.pricePerPerson().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Paid tours must have a price greater than zero");
+        }
+
+        place.setBookingAvailable(request.bookingAvailable());
+        place.setBookingType(request.bookingType());
+        place.setPricePerPerson(request.pricePerPerson());
+
     }
 }

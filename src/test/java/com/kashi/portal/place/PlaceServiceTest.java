@@ -106,7 +106,9 @@ class PlaceServiceTest {
     void createPlaceSavesEveryFieldFromTheRequest() {
         PlaceRequest request = new PlaceRequest("Kedar Ghat", PlaceType.GHAT, "Short text", "Long text",
                 "https://example.com/kedar.jpg", "https://example.com/source",
-                new BigDecimal("25.2999000"), new BigDecimal("83.0102000"));
+                new BigDecimal("25.2999000"), new BigDecimal("83.0102000"), true,
+                BookingType.FREE,
+                BigDecimal.ZERO);
         given(placeRepository.save(any(Place.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         PlaceResponse response = placeService.createPlace(request);
@@ -122,6 +124,10 @@ class PlaceServiceTest {
         assertEquals("https://example.com/source", place.getSourceUrl());
         assertEquals(new BigDecimal("25.2999000"), place.getLatitude());
         assertEquals("Kedar Ghat", response.name());
+        assertTrue(place.isBookingAvailable());
+        assertEquals(BookingType.FREE, place.getBookingType());
+        assertEquals(BigDecimal.ZERO, place.getPricePerPerson());
+
     }
 
     @Test
@@ -129,7 +135,9 @@ class PlaceServiceTest {
         Place existing = place(5L, "Old name", PlaceType.GHAT);
         given(placeRepository.findById(5L)).willReturn(Optional.of(existing));
         given(placeRepository.save(existing)).willReturn(existing);
-        PlaceRequest request = new PlaceRequest("New name", PlaceType.TEMPLE, "New short", null, null, null, null, null);
+        PlaceRequest request = new PlaceRequest("New name", PlaceType.TEMPLE, "New short", null, null, null, null, null, false,
+                BookingType.FREE,
+                BigDecimal.ZERO);
 
         PlaceResponse response = placeService.updatePlace(5L, request);
 
@@ -141,7 +149,9 @@ class PlaceServiceTest {
     @Test
     void updatePlaceThrowsWhenThePlaceDoesNotExist() {
         given(placeRepository.findById(99L)).willReturn(Optional.empty());
-        PlaceRequest request = new PlaceRequest("Name", PlaceType.GHAT, "Short", null, null, null, null, null);
+        PlaceRequest request = new PlaceRequest("Name", PlaceType.GHAT, "Short", null, null, null, null, null, false,
+                BookingType.FREE,
+                BigDecimal.ZERO);
 
         assertThrows(ResourceNotFoundException.class, () -> placeService.updatePlace(99L, request));
 
@@ -176,3 +186,4 @@ class PlaceServiceTest {
                 .build();
     }
 }
+
